@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import NOT_PROVIDED, QuerySet, Manager, Model, ManyToOneRel, ManyToManyRel
 from django.db.models.base import ModelBase
 from graphene.utils.str_converters import to_snake_case
-from graphene_django.utils import is_valid_django_model
+from graphene_django.utils import is_valid_django_model, get_reverse_fields as get_reverse_fields_orig
 from graphql import GraphQLList, GraphQLNonNull
 from graphql.language.ast import FragmentSpread
 
@@ -75,16 +75,24 @@ def get_model_fields(model):
         list(private_fields)  + \
         list(model._meta.fields_map.values())
 
-    # Make sure we don't duplicate local fields with "reverse" version
-    # and get the real reverse django related_name
-    reverse_fields = list(get_reverse_fields(model))
-    exclude_fields = [field[1] for field in reverse_fields]
-
     local_fields = [
         (field.name, field)
         for field
-        in all_fields_list if field not in exclude_fields
+        in sorted(list(model._meta.fields) +
+                  list(model._meta.local_many_to_many))
     ]
+    local_field_names = [field[0] for field in local_fields]
+
+    # Make sure we don't duplicate local fields with "reverse" version
+    # and get the real reverse django related_name
+    reverse_fields = list(get_reverse_fields_orig(model, local_field_names))
+    # exclude_fields = [field[1] for field in reverse_fields]
+
+    # local_fields = [
+    #     (field.name, field)
+    #     for field
+    #     in all_fields_list if field not in exclude_fields
+    # ]
 
     all_fields = local_fields + reverse_fields
 
