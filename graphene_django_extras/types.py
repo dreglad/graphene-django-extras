@@ -98,7 +98,8 @@ class DjangoObjectType(ObjectType):
         _meta.fields = django_fields
         _meta.filterset_class = filterset_class
 
-        super(DjangoObjectType, cls).__init_subclass_with_meta__(_meta=_meta, interfaces=interfaces, **options)
+        super(DjangoInputObjectType, cls).__init_subclass_with_meta__(_meta=_meta, **options)
+
 
         if not skip_registry:
             registry.register(cls)
