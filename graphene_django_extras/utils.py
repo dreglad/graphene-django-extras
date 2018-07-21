@@ -83,6 +83,7 @@ def get_model_fields(model):
     ]
     local_field_names = [field[0] for field in local_fields]
 
+    # WORKAROUND: Commented out some lines as a quick hotfix
     # Make sure we don't duplicate local fields with "reverse" version
     # and get the real reverse django related_name
     reverse_fields = list(get_reverse_fields_orig(model, local_field_names))
@@ -163,9 +164,8 @@ def create_obj(model, new_obj_key=None, *args, **kwargs):
 
 def clean_dict(d):
     """
-        Remove all empty fields in a nested dict
+    Remove all empty fields in a nested dict
     """
-
     if not isinstance(d, (dict, list)):
         return d
     if isinstance(d, list):
@@ -336,7 +336,6 @@ def recursive_params(selection_set, fragments, available_related_fields,
 
 
 def queryset_factory(manager, fields_asts=None, fragments=None, **kwargs):
-
     select_related = []
     prefetch_related = []
     available_related_fields = get_related_fields(manager.model)
@@ -359,9 +358,13 @@ def queryset_factory(manager, fields_asts=None, fragments=None, **kwargs):
             prefetch_related
         )
 
+    # WORKAROUND: Temporal hotfix
+    select_related = list(set([f for f in select_related if f not in prefetch_related]))
+    prefetch_related = list(set(prefetch_related))
+
     if select_related and prefetch_related:
-        return _get_queryset(manager.select_related(
-            *select_related).prefetch_related(*prefetch_related))
+        return _get_queryset(
+            manager.select_related(*select_related).prefetch_related(*prefetch_related))
     elif not select_related and prefetch_related:
         return _get_queryset(manager.prefetch_related(*prefetch_related))
     elif select_related and not prefetch_related:
