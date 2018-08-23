@@ -55,13 +55,13 @@ setup(
     packages=get_packages(),
 
     install_requires=[
-        'graphene-django>=2.0',
-        'django-filter>=1.0.4',
+        'graphene-django>=2.1.0',
+        'django-filter==1.1.0',
         'djangorestframework>=3.6.0'
     ],
     extras_require={
         'date': [
-            'dateutils>=0.6.6',
+            'python-dateutil>=2.7.3',
         ]
     },
     include_package_data=True,
